@@ -1,0 +1,245 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facility Reservation System</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="app.js"></script>
+</head>
+<body>
+
+<div id="loginSection" class="login-container">
+    <div class="login-card">
+        <h1>🏢 Facility Reservation</h1>
+        <p>Facility Reservation and Approval System</p>
+
+        <input type="text" id="fullName" placeholder="Full Name (for registration)">
+        <input type="email" id="email" placeholder="Email Address">
+        <input type="password" id="password" placeholder="Password">
+
+        <button onclick="login()">Login</button>
+        <button class="secondary" onclick="signup()">Create Account</button>
+
+        <p id="loginMessage"></p>
+    </div>
+</div>
+
+<div id="mainSection" class="hidden">
+
+    <header>
+        <div>
+            <h2>🏢 Facility Reservation System</h2>
+            <p>Reservation and Service Request Management</p>
+        </div>
+
+        <div class="user-info">
+            <span id="userName"></span>
+            <span id="userRole"></span>
+            <button onclick="logout()" class="logout">Logout</button>
+        </div>
+    </header>
+
+    <nav>
+        <button onclick="showPage('dashboard')">Dashboard</button>
+        <button onclick="showPage('facilities')">Facilities</button>
+        <button onclick="showPage('reservations')">Reservations</button>
+        <button id="approvalNav" onclick="showPage('approvals')">
+            Approvals
+        </button>
+        <button id="auditNav" onclick="showPage('audit')">
+            Audit Logs
+        </button>
+        <button id="usersNav" onclick="showPage('users')">
+            Users
+        </button>
+    </nav>
+
+    <main>
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="page">
+            <h2>Dashboard</h2>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Total Facilities</h3>
+                    <h1 id="totalFacilities">0</h1>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Total Reservations</h3>
+                    <h1 id="totalReservations">0</h1>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Pending Requests</h3>
+                    <h1 id="pendingReservations">0</h1>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Approved</h3>
+                    <h1 id="approvedReservations">0</h1>
+                </div>
+            </div>
+
+            <h3>Welcome to the Facility Reservation System!</h3>
+            <p>Manage facilities, reservation requests, approvals,
+            and facility schedules.</p>
+        </section>
+
+
+        <!-- FACILITIES -->
+        <section id="facilities" class="page hidden">
+            <h2>Facility Management</h2>
+
+            <div id="facilityFormArea" class="form-card hidden">
+                <h3>Add New Facility</h3>
+
+                <input id="facilityName" placeholder="Facility Name">
+                <input id="facilityLocation" placeholder="Location">
+                <input id="facilityCapacity" type="number"
+                       placeholder="Capacity">
+                <textarea id="facilityDescription"
+                          placeholder="Description"></textarea>
+
+                <select id="facilityStatus">
+                    <option>Active</option>
+                    <option>Maintenance</option>
+                    <option>Inactive</option>
+                </select>
+
+                <button onclick="addFacility()">Save Facility</button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Facility</th>
+                            <th>Location</th>
+                            <th>Capacity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="facilityTable"></tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- RESERVATIONS -->
+        <section id="reservations" class="page hidden">
+            <h2>Reservation Management</h2>
+
+            <div id="reservationFormArea" class="form-card">
+                <h3>Submit Reservation Request</h3>
+
+                <select id="reservationFacility">
+                    <option value="">Select Facility</option>
+                </select>
+
+                <input id="reservationPurpose"
+                       placeholder="Purpose of Reservation">
+
+                <label>Start Date and Time</label>
+                <input type="datetime-local" id="startTime">
+
+                <label>End Date and Time</label>
+                <input type="datetime-local" id="endTime">
+
+                <button onclick="submitReservation()">
+                    Submit Reservation
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Facility</th>
+                            <th>Purpose</th>
+                            <th>Start</th>
+                            <th>End</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reservationTable"></tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- APPROVALS -->
+        <section id="approvals" class="page hidden">
+            <h2>Reservation Approval</h2>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Requester</th>
+                            <th>Facility</th>
+                            <th>Purpose</th>
+                            <th>Schedule</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="approvalTable"></tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- AUDIT LOGS -->
+        <section id="audit" class="page hidden">
+            <h2>System Audit Logs</h2>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User ID</th>
+                            <th>Action</th>
+                            <th>Table</th>
+                            <th>Record ID</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="auditTable"></tbody>
+                </table>
+            </div>
+        </section>
+
+
+        <!-- USER MANAGEMENT -->
+        <section id="users" class="page hidden">
+            <h2>User Role Management</h2>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTable"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+</body>
+</html>
