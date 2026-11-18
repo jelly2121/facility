@@ -6,13 +6,15 @@
 
 -- 1. USER PROFILES AND ROLES
 
-CREATE TABLE IF NOT EXISTS public.profiles (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    full_name TEXT,
-    role TEXT NOT NULL DEFAULT 'Requester'
-        CHECK (role IN ('Administrator', 'Facility Staff', 'Requester')),
-    created_at TIMESTAMPTZ DEFAULT NOW()
+
+UPDATE public.profiles
+SET role = 'Administrator'
+WHERE id = (
+    SELECT id
+    FROM auth.users
+    WHERE email = 'admin@gmail.com'
 );
+
 
 -- Automatically create requester profile on signup
 
@@ -27,7 +29,7 @@ BEGIN
     VALUES (
         NEW.id,
         COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
-        'Requester'
+        'Administrator'
     );
     RETURN NEW;
 END;
@@ -175,13 +177,13 @@ BEGIN
     IF TG_OP = 'UPDATE' THEN
         user_role := public.current_user_role();
 
-        IF user_role = 'Requester'
+        IF user_role = 'administrator'
            AND (
                OLD.user_id <> (SELECT auth.uid())
                OR OLD.status <> 'Pending'
                OR NEW.status <> OLD.status
            ) THEN
-            RAISE EXCEPTION 'Requesters can only edit their own pending requests.';
+            RAISE EXCEPTION 'Administratoe can only edit their own pending requests.';
         END IF;
     END IF;
 
@@ -343,7 +345,7 @@ USING (
     (SELECT public.current_user_role()) = 'Administrator'
 )
 WITH CHECK (
-    role IN ('Administrator', 'Facility Staff', 'Requester')
+    role IN ('Administrator', 'Facility Staff', 'student')
 );
 
 
@@ -376,22 +378,22 @@ USING (
        ('Administrator', 'Facility Staff')
 );
 
-CREATE POLICY "Requester submits reservation"
+CREATE POLICY "Student submits reservation"
 ON public.reservations FOR INSERT
 TO authenticated
 WITH CHECK (
     user_id = (SELECT auth.uid())
     AND status = 'Pending'
-    AND (SELECT public.current_user_role()) = 'Requester'
+    AND (SELECT public.current_user_role()) = 'Student'
 );
 
-CREATE POLICY "Requester updates own pending reservation"
+CREATE POLICY "Student updates own pending reservation"
 ON public.reservations FOR UPDATE
 TO authenticated
 USING (
     user_id = (SELECT auth.uid())
     AND status = 'Pending'
-    AND (SELECT public.current_user_role()) = 'Requester'
+    AND (SELECT public.current_user_role()) = 'Student'
 )
 WITH CHECK (
     user_id = (SELECT auth.uid())
@@ -456,3 +458,4 @@ VALUES
 ('Function Hall', 'Main Building', 100, 'Events and seminars', 'Active'),
 ('Audio Visual Room', 'Second Floor', 50, 'Presentation room', 'Maintenance')
 ON CONFLICT DO NOTHING;
+
