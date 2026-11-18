@@ -1,0 +1,73 @@
+Actors and Use Cases
+- Administrator
+•	Login
+•	Manage facilities
+•	View reservations
+•	Approve reservations
+•	Reject reservations
+•	Schedule reservations
+•	Access audit logs
+•	Manage users
+- Requester
+•	Register account
+•	Login
+•	View facilities
+•	Submit reservation
+•	View own reservations
+•	Cancel pending reservation
+- Facility Staff
+•	Login
+•	View reservations
+•	Start facility usage
+•	Complete reservation
+
+ Role-Permission Matrix
+System Features	Administrator	Requester	Facility Staff
+Login	✓	✓	✓
+Register	✓	✓	✓
+View dashboard	✓	✓	✓
+View facilities	✓	✓	✓
+Add facility	✓	—	—
+Submit reservation	—	✓	—
+View reservations	✓	Own only	✓
+Approve reservation	✓	—	—
+Reject reservation	✓	—	—
+Schedule reservation	✓	—	—
+Cancel pending reservation	—	Own only	—
+Start facility usage	—	—	✓
+Complete reservation	—	—	✓
+Audit logs	✓	—	—
+User management	✓	—	—
+ Reservation Workflow
+The reservation process follows these steps:
+1. User Login
+Requester accesses the system
+2. Select Facility
+Choose an active facility
+3. Submit Reservation
+Enter purpose, start time, and end time
+4. Pending Approval
+5. Administrator Reviews Request
+Approved
+Administrator schedules reservation
+Rejected
+Rejection reason recorded
+6. Facility Staff Starts Usage
+Status becomes In Use
+7. Reservation Completed
+Business Rules
+1.	Every user must have a registered account to access the system.
+2.	A password must contain at least six characters during registration.
+3.	Only Administrators can add facilities.
+4.	Only Requesters can submit reservation requests.
+5.	Reservations must have a selected facility, purpose, start time, and end time.
+6.	Reservation start time must be in the future.
+7.	Reservation end time must be later than the start time.
+8.	Only Administrators can approve or reject pending reservations.
+9.	An Administrator must provide a rejection reason.
+10.	Only approved reservations can be scheduled.
+11.	Requesters can cancel only their own pending reservations.
+12.	Only Facility Staff can update reservations to In Use or Completed.
+13.	Only active facilities appear in the reservation selection list.
+14.	Users can only access features permitted by their assigned roles.
+
